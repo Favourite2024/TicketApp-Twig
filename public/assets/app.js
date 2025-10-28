@@ -1,10 +1,13 @@
 (function(){
   const SESSION_KEY = 'ticketapp_session';
   const TICKETS_KEY = 'ticketapp_tickets';
+  const USERS_KEY = 'ticketapp_users'; // ✅ NEW LINE — for storing registered users
 
+  // ===== Helpers: Selectors =====
   const $ = (sel, root=document) => root.querySelector(sel);
   const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
+  // ===== Toasts =====
   function showToast(msg){
     const t = $('#toast');
     if(!t) return;
@@ -13,16 +16,27 @@
     setTimeout(()=>t.classList.remove('show'), 1800);
   }
 
+  // ===== Session Storage =====
   function getSession(){
     try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e){ return null; }
   }
   function setSession(data){ localStorage.setItem(SESSION_KEY, JSON.stringify(data)); }
   function clearSession(){ localStorage.removeItem(SESSION_KEY); }
 
+  // ===== Ticket Storage =====
   function getTickets(){
     try { return JSON.parse(localStorage.getItem(TICKETS_KEY)) || []; } catch(e){ return []; }
   }
   function setTickets(arr){ localStorage.setItem(TICKETS_KEY, JSON.stringify(arr)); }
+
+  // ===== User Storage =====
+  function getUsers(){
+    try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch(e){ return []; }
+  }
+  function setUsers(arr){
+    localStorage.setItem(USERS_KEY, JSON.stringify(arr));
+  }
+
 
   // ===== Helper: Refresh Dashboard if visible =====
   function refreshDashboardIfVisible() {
@@ -74,63 +88,95 @@
   }
 
   // ===== Auth Pages =====
-  function initAuthPages(){
-    const loginForm = $('#loginForm');
-    if (loginForm){
-      loginForm.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const fd = new FormData(loginForm);
-        const email = (fd.get('email')||'').trim();
-        const password = (fd.get('password')||'').trim();
+function initAuthPages(){
+  // ---- LOGIN ----
+  const loginForm = $('#loginForm');
+  if (loginForm){
+    loginForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(loginForm);
+      const rawEmail = (fd.get('email')||'').trim();
+      const email = rawEmail.toLowerCase(); // normalize
+      const password = (fd.get('password')||'').trim();
 
-        setFieldError(loginForm,'email','');
-        setFieldError(loginForm,'password','');
+      setFieldError(loginForm,'email','');
+      setFieldError(loginForm,'password','');
 
-        let valid = true;
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-          setFieldError(loginForm,'email','Enter a valid email.');
-          valid = false;
-        }
-        if (!password || password.length < 6){
-          setFieldError(loginForm,'password','Password must be at least 6 characters.');
-          valid = false;
-        }
-        if (!valid){ showToast('Invalid credentials'); return; }
+      let valid = true;
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        setFieldError(loginForm,'email','Enter a valid email.');
+        valid = false;
+      }
+      if (!password || password.length < 6){
+        setFieldError(loginForm,'password','Password must be at least 6 characters.');
+        valid = false;
+      }
+      if (!valid){ showToast('Invalid credentials'); return; }
 
-        setSession({ email, token: 'fake-token' });
-        showToast('Login successful');
-        window.location.href='/?page=dashboard';
-      });
-    }
+      // ✅ REAL CHECKS
+      const users = getUsers();
+      const user = users.find(u => u.email === email);
 
-    const signupForm = $('#signupForm');
-    if (signupForm){
-      signupForm.addEventListener('submit',(e)=>{
-        e.preventDefault();
-        const fd = new FormData(signupForm);
-        const email = (fd.get('email')||'').trim();
-        const password = (fd.get('password')||'').trim();
+      if (!user){
+        setFieldError(loginForm, 'email', 'Email not found.');
+        showToast('Account not found');
+        return;
+      }
+      if (user.password !== password){
+        setFieldError(loginForm, 'password', 'Incorrect password.');
+        showToast('Wrong password');
+        return;
+      }
 
-        setFieldError(signupForm,'email','');
-        setFieldError(signupForm,'password','');
-
-        let valid = true;
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-          setFieldError(signupForm,'email','Enter a valid email.');
-          valid = false;
-        }
-        if (!password || password.length < 6){
-          setFieldError(signupForm,'password','Password must be at least 6 characters.');
-          valid = false;
-        }
-        if (!valid){ showToast('Please fix the errors'); return; }
-
-        setSession({ email, token: 'fake-token' });
-        showToast('Account created');
-        window.location.href='/?page=dashboard';
-      });
-    }
+      setSession({ email, token: 'fake-token' });
+      showToast('Login successful');
+      window.location.href='/?page=dashboard';
+    });
   }
+
+  // ---- SIGNUP ----
+  const signupForm = $('#signupForm');
+  if (signupForm){
+    signupForm.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const fd = new FormData(signupForm);
+      const rawEmail = (fd.get('email')||'').trim();
+      const email = rawEmail.toLowerCase(); // normalize
+      const password = (fd.get('password')||'').trim();
+
+      setFieldError(signupForm,'email','');
+      setFieldError(signupForm,'password','');
+
+      let valid = true;
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        setFieldError(signupForm,'email','Enter a valid email.');
+        valid = false;
+      }
+      if (!password || password.length < 6){
+        setFieldError(signupForm,'password','Password must be at least 6 characters.');
+        valid = false;
+      }
+      if (!valid){ showToast('Please fix the errors'); return; }
+
+      // ✅ DUPLICATE CHECK
+      const users = getUsers();
+      if (users.some(u => u.email === email)){
+        setFieldError(signupForm, 'email', 'Email is already registered.');
+        showToast('Email already exists');
+        return;
+      }
+
+      // ✅ SAVE USER
+      users.push({ email, password });
+      setUsers(users);
+
+      setSession({ email, token: 'fake-token' });
+      showToast('Account created');
+      window.location.href='/?page=dashboard';
+    });
+  }
+}
+
 
   // ===== Dashboard KPIs =====
   function initDashboard(){
@@ -149,6 +195,26 @@
     if (inProgEl) inProgEl.textContent = inProgressCount;
     $('#kpiClosed').textContent = closedCount;
   }
+
+  // init Dashboard ======
+
+  function updateLandingChips() {
+    const tickets = getTickets();
+    if (!tickets || !tickets.length) return;
+  
+    const openCount = tickets.filter(t => t.status === 'open').length;
+    const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
+    const closedCount = tickets.filter(t => t.status === 'closed').length;
+  
+    const openEl = document.getElementById('chipOpen');
+    const inProgEl = document.getElementById('chipInProgress');
+    const closedEl = document.getElementById('chipClosed');
+  
+    if (openEl) openEl.textContent = openCount;
+    if (inProgEl) inProgEl.textContent = inProgressCount;
+    if (closedEl) closedEl.textContent = closedCount;
+  }
+  
 
   // ===== Ticket Management =====
   function escapeHTML(s){
@@ -288,6 +354,7 @@
     applyGuards();
     initAuthPages();
     initTicketsPage();
+    
 
     // detect which page we’re on
     const url = new URL(window.location.href);
@@ -299,9 +366,16 @@
       initDashboard();
     }
 
+    // landing chips 
+    const session = getSession();
+if (session) updateLandingChips();
+
+
     // live sync if data changes in localStorage
     window.addEventListener('storage', (e)=>{
       if (e.key === TICKETS_KEY) initDashboard();
     });
   });
 })();
+
+

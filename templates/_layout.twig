@@ -13,42 +13,61 @@
     .card, .site-header, .ticket-card, .site-footer, .form input, .form select, .form textarea {
       transition: background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
     }
+
+    /* ===== Layout fix: make footer stick to bottom ===== */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .page-wrapper {
+      min-height: 100vh;           /* full page height */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-content {
+      flex: 1;                     /* push footer down */
+    }
   </style>
 </head>
 
 <body>
-  <header class="site-header">
-    <div class="container">
-      <a href="/?page=landing" class="logo">TicketApp</a>
-      <nav class="nav">
-        <a href="/?page=landing">Home</a>
-        <a href="/?page=dashboard" data-guard="auth-only">Dashboard</a>
-        <a href="/?page=tickets" data-guard="auth-only">Tickets</a>
-        <a href="/?page=login" data-guard="guest-only">Login</a>
-        <button id="logoutBtn" class="btn-outline" data-guard="auth-only" style="display:none;">Logout</button>
+  <div class="page-wrapper">
+    <header class="site-header">
+      <div class="container">
+        <a href="/?page=landing" class="logo">TicketApp</a>
+        <nav class="nav">
+          <a href="/?page=landing">Home</a>
+          <a href="/?page=dashboard" data-guard="auth-only">Dashboard</a>
+          <a href="/?page=tickets" data-guard="auth-only">Tickets</a>
+          <a href="/?page=login" data-guard="guest-only">Login</a>
+          <button id="logoutBtn" class="btn-outline" data-guard="auth-only" style="display:none;">Logout</button>
 
-        <!-- 🌙 / ☀️ Theme Toggle Button -->
-        <button id="themeToggle" class="btn-secondary" style="margin-left:10px;">
-          🌙 Dark Mode
-        </button>
-      </nav>
-    </div>
-  </header>
+          <!-- 🌙 / ☀️ Theme Toggle Button -->
+          <button id="themeToggle" class="btn-secondary" style="margin-left:10px;">
+            🌙 Dark Mode
+          </button>
+        </nav>
+      </div>
+    </header>
 
-  {% block hero %}{% endblock %}
+    {% block hero %}{% endblock %}
 
-  <main class="container">
-    {% block content %}
-      <!-- Default content (won’t show if overridden) -->
-      <h1 style="margin:2rem 0">Template Loaded</h1>
-    {% endblock %}
-  </main>
+    <main class="container page-content">
+      {% block content %}
+        <!-- Default content (won’t show if overridden) -->
+        <h1 style="margin:2rem 0">Template Loaded</h1>
+      {% endblock %}
+    </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p>© {{ "now"|date("Y") }} TicketApp — All rights reserved.</p>
-    </div>
-  </footer>
+    <footer class="site-footer">
+      <div class="container">
+        <p>© {{ "now"|date("Y") }} TicketApp — All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
 
   <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
