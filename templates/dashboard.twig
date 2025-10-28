@@ -1,0 +1,32 @@
+{% extends "_layout.twig" %}
+{% block title %}Dashboard · TicketApp{% endblock %}
+
+{% block content %}
+<section>
+  <h2>Dashboard</h2>
+  <p class="muted" id="userLine" style="margin-top:-6px;"></p>
+
+  <div id="kpiRow" class="kpis">
+    <div class="card">
+      <div class="kpi-label">Total tickets</div>
+      <div class="kpi-value" id="kpiTotal">0</div>
+    </div>
+    <div class="card">
+      <div class="kpi-label">Open</div>
+      <div class="kpi-value" id="kpiOpen">0</div>
+    </div>
+    <div class="card">
+      <div class="kpi-label">In_progress</div>
+      <div class="kpi-value" id="kpiIn_progress">0</div>
+    </div>
+  </div>
+
+  <div class="card">
+      <div class="kpi-label">Closed</div>
+      <div class="kpi-value" id="kpiClosed">0</div>
+    </div>
+  </div>
+
+  <p><a class="btn" href="/?page=tickets">Go to Ticket Management</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}TicketApp{% endblock %}</title>
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    /* Smooth transition when toggling themes */
+    body {
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+    .card, .site-header, .ticket-card, .site-footer, .form input, .form select, .form textarea {
+      transition: background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/?page=landing" class="logo">TicketApp</a>
+      <nav class="nav">
+        <a href="/?page=landing">Home</a>
+        <a href="/?page=dashboard" data-guard="auth-only">Dashboard</a>
+        <a href="/?page=tickets" data-guard="auth-only">Tickets</a>
+        <a href="/?page=login" data-guard="guest-only">Login</a>
+        <button id="logoutBtn" class="btn-outline" data-guard="auth-only" style="display:none;">Logout</button>
+
+        <!-- 🌙 / ☀️ Theme Toggle Button -->
+        <button id="themeToggle" class="btn-secondary" style="margin-left:10px;">
+          🌙 Dark Mode
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  {% block hero %}{% endblock %}
+
+  <main class="container">
+    {% block content %}
+      <!-- Default content (won’t show if overridden) -->
+      <h1 style="margin:2rem 0">Template Loaded</h1>
+    {% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© {{ "now"|date("Y") }} TicketApp — All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="/assets/app.js"></script>
+
+  <!-- 🌗 Dark / Light Mode Toggle Script -->
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const userPref = localStorage.getItem('theme');
+
+    // Apply saved preference
+    if (userPref === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeToggle.textContent = '☀️ Light Mode';
+    }
+
+    // Toggle between light/dark modes
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{% extends "_layout.twig" %}
+{% block title %}Tickets · TicketApp{% endblock %}
+
+{% block content %}
+<section class="tickets">
+  <h2>Ticket Management</h2>
+
+  <form id="ticketForm" class="form card">
+    <h3 id="formTitle">Create Ticket</h3>
+    <input type="hidden" name="id" />
+    <label>Title *
+      <input type="text" name="title" required maxlength="100" placeholder="Short issue title" />
+      <small class="error" data-error-for="title"></small>
+    </label>
+    <label>Status *
+      <select name="status" required>
+        <option value="">Select status</option>
+        <option value="open">open</option>
+        <option value="in_progress">in_progress</option>
+        <option value="closed">closed</option>
+      </select>
+      <small class="error" data-error-for="status"></small>
+    </label>
+    <label>Description (optional)
+      <textarea name="description" maxlength="500" placeholder="Describe the issue (max 500 chars)"></textarea>
+      <small class="error" data-error-for="description"></small>
+    </label>
+    <div class="row">
+      <button class="btn" type="submit">Save</button>
+      <button class="btn-secondary" type="button" id="resetFormBtn">Reset</button>
+    </div>
+  </form>
+
+  <div id="ticketsList" class="grid"></div>
+</section>
+{% endblock %}

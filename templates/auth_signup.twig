@@ -1,0 +1,20 @@
+{% extends "_layout.twig" %}
+{% block title %}Sign Up · TicketApp{% endblock %}
+
+{% block content %}
+<section class="auth">
+  <h2>Create Account</h2>
+  <form id="signupForm" class="form">
+    <label>Email
+      <input type="email" name="email" required placeholder="you@example.com" />
+      <small class="error" data-error-for="email"></small>
+    </label>
+    <label>Password
+      <input type="password" name="password" required minlength="6" placeholder="At least 6 characters" />
+      <small class="error" data-error-for="password"></small>
+    </label>
+    <button class="btn" type="submit">Sign Up</button>
+    <p class="muted">Already have an account? <a href="/?page=login">Login</a>.</p>
+  </form>
+</section>
+{% endblock %}
